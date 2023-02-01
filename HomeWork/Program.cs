@@ -25,7 +25,6 @@ internal class Program
         });
 
         thred.Start();
-        Thread.Sleep(300);
 
         thred = new Thread(() =>
         {
