@@ -4,19 +4,23 @@ internal class Program
 {
     private static void Main(string[] args)
     {
+        var block = new object();
         var file = new FileStream(@"D:\TEST\text.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
         var file1 = new FileStream(@"D:\TEST\text1.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
         var file2 = new FileStream(@"D:\TEST\text2.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
         var thred = new Thread(() =>
         {
-            var hash = Thread.CurrentThread.GetHashCode();
-            var streamReader = new StreamReader(file);
-            var result = streamReader.ReadToEnd();
-            using (var sw = new StreamWriter(file2))
+            lock (block)
             {
-                Console.WriteLine($"Номер потока - {hash}");
-                sw.WriteLine(result);
+                var hash = Thread.CurrentThread.GetHashCode();
+                var streamReader = new StreamReader(file);
+                var result = streamReader.ReadToEnd();
+                using (var sw = new StreamWriter(file2))
+                {
+                    Console.WriteLine($"Номер потока - {hash}");
+                    sw.WriteLine(result);
+                }
             }
         });
 
@@ -25,13 +29,16 @@ internal class Program
 
         thred = new Thread(() =>
         {
-            var hash = Thread.CurrentThread.GetHashCode();
-            var streamReader = new StreamReader(file1);
-            var result = streamReader.ReadToEnd();
-            using (var sw = new StreamWriter(@"D:\TEST\text2.txt", true))
+            lock (block)
             {
-                Console.WriteLine($"Номер потока - {hash}");
-                sw.WriteLine(result);
+                var hash = Thread.CurrentThread.GetHashCode();
+                var streamReader = new StreamReader(file1);
+                var result = streamReader.ReadToEnd();
+                using (var sw = new StreamWriter(@"D:\TEST\text2.txt", true))
+                {
+                    Console.WriteLine($"Номер потока - {hash}");
+                    sw.WriteLine(result);
+                }
             }
         });
         thred.Start();
